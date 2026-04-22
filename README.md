@@ -62,3 +62,30 @@ Voltage: 11.10 V, Current: -2.50 A, Temp: 25.50 C
 (Validator)
 <img width="524" height="196" alt="3" src="https://github.com/user-attachments/assets/7a21be08-0122-4d0e-b679-74df90442f5e" />
 
+## Под STM32 по сути нужно заменить вызовы POSIX-сокета на HAL-функции STM32. Выглядеть будет +- так (вместо блока write в battery_tx.c):
+```c
+// Внутри цикла while (offset < len)
+
+CAN_TxHeaderTypeDef TxHeader;
+uint8_t TxData[8];
+
+// Тут заполню заголовок
+TxHeader.ExtId = can_id;
+TxHeader.IDE = CAN_ID_EXT;
+TxHeader.RTR = CAN_RTR_DATA;
+TxHeader.DLC = 1 + chunk; // байт заголовка UAVCAN + данные
+TxHeader.TransmitGlobalTime = DISABLE;
+
+// Тут заполню данные
+TxData[0] = hdr; // Заголовок трансфера UAVCAN
+memcpy(&TxData[1], &payload[offset], chunk);
+
+// отправка
+uint32_t TxMailbox;
+if (HAL_CAN_AddTxMessage(&hcan, &TxHeader, TxData, &TxMailbox) != HAL_OK) {
+    Error_Handler();
+}
+
+// тут можно подождать завершения mailbox или прерываниями как то обыграть
+while(HAL_CAN_IsTxMessagePending(&hcan, TxMailbox));
+```
