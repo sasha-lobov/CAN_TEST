@@ -62,7 +62,7 @@ Voltage: 11.10 V, Current: -2.50 A, Temp: 25.50 C
 (Validator)
 <img width="524" height="196" alt="3" src="https://github.com/user-attachments/assets/7a21be08-0122-4d0e-b679-74df90442f5e" />
 
-## Под STM32 по сути нужно заменить вызовы POSIX-сокета на HAL-функции STM32. Выглядеть будет +- так (вместо блока write в battery_tx.c):
+## Под STM32 по сути нужно заменить вызовы сокета на HAL-функции STM32. Выглядеть будет +- так (вместо блока write в battery_tx.c):
 ```c
 // Внутри цикла while (offset < len)
 
